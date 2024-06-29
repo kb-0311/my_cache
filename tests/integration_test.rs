@@ -15,15 +15,26 @@ fn test_fifo_cache() {
 
 #[test]
 fn test_lru_cache() {
+    // Initialize a new LRU cache with capacity 2
     let mut lru_cache = Cache::new(2, LruPolicy::new());
+
+    // Insert two entries into the cache
     lru_cache.put(1, "one");
     lru_cache.put(2, "two");
+
+    // Verify initial entries are in cache
     assert_eq!(lru_cache.get(&1), Some(&"one"));
+    assert_eq!(lru_cache.get(&2), Some(&"two"));
+
+    // Insert a third entry to trigger eviction
     lru_cache.put(3, "three");
-    assert_eq!(lru_cache.get(&1), Some(&"one")); // 1 should not be evicted
-    assert_eq!(lru_cache.get(&2), None); // 2 should be evicted
-    assert_eq!(lru_cache.get(&3), Some(&"three"));
+
+    // Ensure correct eviction and remaining entries
+    assert_eq!(lru_cache.get(&1) , None);    // 1 should still be in cache
+    assert_eq!(lru_cache.get(&2),  Some(&"two"));            // 2 should be evicted
+    assert_eq!(lru_cache.get(&3), Some(&"three"));  // 3 should be in cache now
 }
+
 
 #[test]
 fn test_lifo_cache() {

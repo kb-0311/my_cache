@@ -1,45 +1,43 @@
-use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::hash::Hash;
 use super::EvictionPolicy;
 
+/// LRU (Least Recently Used) eviction policy based on a deque.
 pub struct LruPolicy<K> {
-    map: HashMap<K, usize>,
-    counter: usize,
+    deque: VecDeque<K>, // Deque to maintain the access order of keys
 }
 
-impl<K: Eq + Hash + Clone + PartialEq> LruPolicy<K> {
+impl<K> LruPolicy<K> {
+    /// Creates a new LRU eviction policy.
     pub fn new() -> Self {
         Self {
-            map: HashMap::new(),
-            counter: 0,
+            deque: VecDeque::new(),
         }
     }
 }
 
-impl<K: Eq + Hash + Clone + PartialEq> EvictionPolicy<K> for LruPolicy<K> {
+impl<K: Clone + PartialEq + Hash> EvictionPolicy<K> for LruPolicy<K> {
+    /// Notifies the policy about a get operation with a key.
     fn on_get(&mut self, key: &K) {
-        self.counter += 1;
-        self.map.insert(key.clone(), self.counter);
+        // When a key is accessed, move it to the back of the deque
+        self.deque.retain(|k| k != key); // Ensure only one copy of the key exists
+        self.deque.push_back(key.clone());
     }
 
+    /// Notifies the policy about a put operation with a new key.
     fn on_put(&mut self, key: K) {
-        self.counter += 1;
-        self.map.insert(key, self.counter);
+        // Add the new key to the back of the deque
+        self.deque.push_back(key);
     }
 
+    /// Notifies the policy about a remove operation on a key.
     fn on_remove(&mut self, key: &K) {
-        self.map.remove(key);
+        // Remove the key from the deque if it exists
+        self.deque.retain(|k| k != key);
     }
 
+    /// Evicts and returns the least recently used key according to LRU order.
     fn evict(&mut self) -> Option<K> {
-        // Find the key to evict
-        let key_to_evict = self.map.iter().min_by_key(|entry| entry.1).map(|(key, _)| key.clone());
-        
-        // Remove the key from the map if it exists
-        if let Some(key) = key_to_evict {
-            self.map.remove(&key);
-            return Some(key);
-        }
-        None
+        self.deque.pop_front() // Remove and return the frontmost key in the deque
     }
 }

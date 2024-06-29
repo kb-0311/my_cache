@@ -14,7 +14,8 @@ pub fn run_example() {
     let mut lru_cache = Cache::new(2, LruPolicy::new());
     lru_cache.put(1, "one");
     lru_cache.put(2, "two");
-    println!("LRU Cache: get(&1) = {:?}", lru_cache.get(&1));
+
+    println!("LRU Cache: get(&1) = {:?} , 1 becomes the most recently used key", lru_cache.get(&1));
     lru_cache.put(3, "three");
     println!("LRU Cache after putting key 3: get(&1) = {:?}", lru_cache.get(&1));
     println!("LRU Cache after putting key 3: get(&2) = {:?}", lru_cache.get(&2));

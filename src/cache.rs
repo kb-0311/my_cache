@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use std::hash::Hash;
 use crate::eviction_policies::EvictionPolicy;
 
+/// Cache struct that stores key-value pairs with an eviction policy.
 pub struct Cache<K, V, P>
 where
     K: Eq + Hash + Clone,
@@ -11,6 +12,7 @@ where
     store: HashMap<K, V>,
     policy: P,
     capacity: usize,
+    // Arc and Mutex for thread-safe operations
     lock: Arc<Mutex<()>>,
 }
 
@@ -28,11 +30,16 @@ where
         }
     }
 
+    /// Retrieves a value from the cache based on the provided key.
+    /// Returns `Some(&V)` if the key exists, otherwise `None`.
     pub fn get(&mut self, key: &K) -> Option<&V> {
         let _lock = self.lock.lock().unwrap();
         self.policy.on_get(key);
         self.store.get(key)
     }
+
+    /// Inserts a key-value pair into the cache.
+    /// If the cache exceeds its capacity, it may trigger eviction based on the policy.
 
     pub fn put(&mut self, key: K, value: V) {
         let _lock = self.lock.lock().unwrap();
@@ -44,6 +51,9 @@ where
         self.policy.on_put(key.clone());
         self.store.insert(key, value);
     }
+
+    /// Removes a key-value pair from the cache based on the provided key.
+    /// Returns `Some(V)` of the removed value if the key existed, otherwise `None`.
 
     pub fn remove(&mut self, key: &K) -> Option<V> {
         let _lock = self.lock.lock().unwrap();

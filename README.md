@@ -4,6 +4,12 @@ This Rust library provides an in-memory caching system with support for multiple
 
 ## Features
 
+The main features this library supports are :
+
+1. Support for multiple Standard Eviction Policies ( FIFO, LRU, LIFO )
+2. Support to add custom eviction policies.
+3. Thread Safety
+
 ### Standard Eviction Policies
 
 The library supports the following standard eviction policies:

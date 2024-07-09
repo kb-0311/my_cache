@@ -81,3 +81,5 @@ fn test_random_cache() {
     assert_eq!(random_cache.get(&3).is_some(), evicted_key != 3);
     assert_eq!(random_cache.get(&4), Some(&"four"));
 }
+
+
